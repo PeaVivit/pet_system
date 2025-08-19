@@ -1,107 +1,198 @@
-// src/components/UserDashboard.jsx
-import React, { useEffect, useState } from 'react';
-import api from '../api';
-import LogoutButton from './LogoutButton';
-import { jwtDecode } from 'jwt-decode'; 
-
+import React, { useEffect, useState } from "react";
+import LogoutButton from "./LogoutButton";
+import api from "../api";
 
 const UserDashboard = () => {
   const [user, setUser] = useState(null);
-  const [editMode, setEditMode] = useState(false);
-  const [formData, setFormData] = useState({});
-  const [userId, setUserId] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(null);
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [newPet, setNewPet] = useState({
+    name: "",
+    species: "",
+    color: "",
+    gender: "",
+    weight: "",
+    image_url: "",
+  });
 
   useEffect(() => {
-    fetchCurrentUser();
+    fetchUserData();
   }, []);
 
-  const fetchCurrentUser = async () => {
-  try {
-    const token = localStorage.getItem('token');
-    if (!token) return;
-
-    const decoded = jwtDecode(token);
-    console.log('Token Payload:', decoded); // 🔎 ดูว่ามี field อะไรบ้าง
-    const id = decoded.id || decoded.sub_id || decoded.userId;
-
-    if (!id) {
-      console.error("❌ ไม่พบ ID ใน token:", decoded);
-      return;
-    }
-
-    setUserId(id);
-
-    const res = await api.get(`/pet_system/app_user/${id}`);
-    setUser(res.data);
-    setFormData(res.data);
-  } catch (error) {
-    console.error('🚫 Error fetching user:', error);
-  }
-};
-
-
-
-  const handleChange = (e) => {
-    setFormData({ ...formData, [e.target.name]: e.target.value });
-  };
-
-  const handleUpdate = async () => {
+  const fetchUserData = async () => {
     try {
-      await api.put(`/pet_system/app_user/${userId}`, formData);
-      setEditMode(false);
-      fetchCurrentUser();
-    } catch (error) {
-      console.error('Error updating user:', error);
+      const res = await api.get("/app_user/me");
+      setUser(res.data);
+    } catch (err) {
+      console.error("Failed to load user data", err);
+      setError("Cannot fetch user data. Maybe unauthorized?");
+    } finally {
+      setLoading(false);
     }
   };
 
-  const handleDelete = async () => {
-    if (window.confirm('แน่ใจว่าต้องการลบบัญชีผู้ใช้นี้?')) {
-      try {
-        await api.delete(`/pet_system/app_user/${userId}`);
-        alert('บัญชีผู้ใช้ถูกลบแล้ว');
-        localStorage.removeItem('token');
-        window.location.href = '/login';
-      } catch (error) {
-        console.error('Error deleting user:', error);
-      }
+  const handleAddPet = async (e) => {
+    e.preventDefault();
+    try {
+      await api.post("/pets", {
+        ...newPet,
+        userId: user.id,
+      });
+      setShowAddForm(false);
+      setNewPet({
+        name: "",
+        species: "",
+        color: "",
+        gender: "",
+        weight: "",
+        image_url: "",
+      });
+      fetchUserData();
+    } catch (err) {
+      console.error("Failed to add pet", err);
+      alert("Error while adding pet");
     }
   };
 
-  if (!user) return <p>Loading...</p>;
+  if (loading) return <p className="text-center">Loading user data...</p>;
+  if (error) return <p className="text-center text-red-500">{error}</p>;
 
   return (
-    <div className="p-6 max-w-xl mx-auto">
-      <h2 className="text-2xl font-bold mb-4">👤 User Dashboard</h2>
-      <LogoutButton />
+    <div className="max-w-4xl mx-auto p-6 bg-white shadow-lg rounded-lg mt-6">
+      {/* ✅ User Info */}
+      <h2 className="text-3xl font-bold mb-4 text-blue-600">User Dashboard</h2>
+      <div className="bg-gray-50 p-4 rounded-md shadow-sm mb-6">
+        <p><strong>Name:</strong> {user.first_name} {user.last_name}</p>
+        <p><strong>Nickname:</strong> {user.nick_name}</p>
+        <p><strong>Email:</strong> {user.email}</p>
+        <p><strong>Age:</strong> {user.age}</p>
+        <p><strong>Role:</strong> {user.role}</p>
+        <p><strong>Status:</strong> {user.status}</p>
+        <p><strong>Created at:</strong> {new Date(user.created_at).toLocaleString()}</p>
+      </div>
 
-      {editMode ? (
-        <>
-          <div className="space-y-2">
-            <input name="first_name" value={formData.first_name} onChange={handleChange} className="border p-2 w-full" placeholder="ชื่อจริง" />
-            <input name="last_name" value={formData.last_name} onChange={handleChange} className="border p-2 w-full" placeholder="นามสกุล" />
-            <input name="nick_name" value={formData.nick_name} onChange={handleChange} className="border p-2 w-full" placeholder="ชื่อเล่น" />
-            <input name="age" type="number" value={formData.age} onChange={handleChange} className="border p-2 w-full" placeholder="อายุ" />
-            <input name="status" value={formData.status} onChange={handleChange} className="border p-2 w-full" placeholder="สถานะ" />
-          </div>
-          <div className="mt-4 space-x-2">
-            <button onClick={handleUpdate} className="bg-green-500 text-white px-4 py-2 rounded">💾 บันทึก</button>
-            <button onClick={() => setEditMode(false)} className="bg-gray-500 text-white px-4 py-2 rounded">ยกเลิก</button>
-          </div>
-        </>
-      ) : (
-        <div className="bg-white border rounded p-4 shadow">
-          <p><strong>ชื่อ:</strong> {user.first_name} {user.last_name} ({user.nick_name})</p>
-          <p><strong>อายุ:</strong> {user.age}</p>
-          <p><strong>อีเมล:</strong> {user.email}</p>
-          <p><strong>สถานะ:</strong> {user.status}</p>
-
-          <div className="mt-4 space-x-2">
-            <button onClick={() => setEditMode(true)} className="bg-yellow-500 text-white px-4 py-2 rounded">✏️ แก้ไข</button>
-            <button onClick={handleDelete} className="bg-red-500 text-white px-4 py-2 rounded">🗑️ ลบบัญชี</button>
-          </div>
+      {/* ✅ Pets Section */}
+      <h3 className="text-2xl font-semibold mb-3">My Pets</h3>
+      {user.pets && user.pets.length > 0 ? (
+        <div className="overflow-x-auto">
+          <table className="min-w-full border-collapse border border-gray-200 shadow-sm">
+            <thead className="bg-gray-100">
+              <tr>
+                <th className="border px-4 py-2">Image</th>
+                <th className="border px-4 py-2">Name</th>
+                <th className="border px-4 py-2">Species</th>
+                <th className="border px-4 py-2">Color</th>
+                <th className="border px-4 py-2">Gender</th>
+                <th className="border px-4 py-2">Weight</th>
+              </tr>
+            </thead>
+            <tbody>
+              {user.pets.map((pet) => (
+                <tr key={pet.id} className="hover:bg-gray-50">
+                  <td className="border px-4 py-2 text-center">
+                    {pet.image_url ? (
+                      <img
+                        src={pet.image_url}
+                        alt={pet.name}
+                        className="w-16 h-16 object-cover rounded-md mx-auto"
+                      />
+                    ) : (
+                      <span className="text-gray-400">No Image</span>
+                    )}
+                  </td>
+                  <td className="border px-4 py-2">{pet.name}</td>
+                  <td className="border px-4 py-2">{pet.species}</td>
+                  <td className="border px-4 py-2">{pet.color}</td>
+                  <td className="border px-4 py-2">{pet.gender}</td>
+                  <td className="border px-4 py-2">{pet.weight} kg</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
         </div>
+      ) : (
+        <p className="text-gray-500 italic">🐾 You have no pets yet.</p>
       )}
+
+      {/* ✅ Add Pet Form */}
+      <div className="mt-6">
+        {!showAddForm ? (
+          <button
+            onClick={() => setShowAddForm(true)}
+            className="bg-blue-500 text-white px-5 py-2 rounded-lg shadow hover:bg-blue-600"
+          >
+            ➕ Add Pet
+          </button>
+        ) : (
+          <form onSubmit={handleAddPet} className="mt-4 space-y-3 bg-gray-50 p-4 rounded-md shadow-md">
+            <input
+              type="text"
+              placeholder="Pet Name"
+              value={newPet.name}
+              onChange={(e) => setNewPet({ ...newPet, name: e.target.value })}
+              className="w-full border p-2 rounded"
+              required
+            />
+            <input
+              type="text"
+              placeholder="Species"
+              value={newPet.species}
+              onChange={(e) => setNewPet({ ...newPet, species: e.target.value })}
+              className="w-full border p-2 rounded"
+              required
+            />
+            <input
+              type="text"
+              placeholder="Color"
+              value={newPet.color}
+              onChange={(e) => setNewPet({ ...newPet, color: e.target.value })}
+              className="w-full border p-2 rounded"
+            />
+            <input
+              type="text"
+              placeholder="Gender"
+              value={newPet.gender}
+              onChange={(e) => setNewPet({ ...newPet, gender: e.target.value })}
+              className="w-full border p-2 rounded"
+            />
+            <input
+              type="number"
+              placeholder="Weight (kg)"
+              value={newPet.weight}
+              onChange={(e) => setNewPet({ ...newPet, weight: e.target.value })}
+              className="w-full border p-2 rounded"
+            />
+            <input
+              type="text"
+              placeholder="Image URL"
+              value={newPet.image_url}
+              onChange={(e) => setNewPet({ ...newPet, image_url: e.target.value })}
+              className="w-full border p-2 rounded"
+            />
+            <div className="flex space-x-2">
+              <button
+                type="submit"
+                className="bg-green-500 text-white px-4 py-2 rounded hover:bg-green-600"
+              >
+                ✅ Save
+              </button>
+              <button
+                type="button"
+                onClick={() => setShowAddForm(false)}
+                className="bg-gray-400 text-white px-4 py-2 rounded hover:bg-gray-500"
+              >
+                ❌ Cancel
+              </button>
+            </div>
+          </form>
+        )}
+      </div>
+
+      {/* ✅ Logout */}
+      <div className="mt-6">
+        <LogoutButton />
+      </div>
     </div>
   );
 };

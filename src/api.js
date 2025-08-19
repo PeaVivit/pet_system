@@ -29,3 +29,5 @@ export const login = async (data) => {
 
 // ✅ Export instance ที่ใช้ Token ไปใช้ใน component อื่น ๆ
 export default api;
+
+
