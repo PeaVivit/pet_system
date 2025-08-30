@@ -16,7 +16,7 @@ const AuthForm = () => {
     age: "",
     email: "",
     password: "",
-    role: "USER", // default
+    role: "USER",
   });
 
   // ✅ Redirect หากมี token อยู่แล้ว
@@ -30,16 +30,15 @@ const AuthForm = () => {
     }
   }, [navigate]);
 
-  // ✅ Toggle SignIn / SignUp และ clear ฟอร์ม
-  const handleToggle = () => {
-    setForm({ ...form, email: "", password: "" });
-    setIsSignUp(!isSignUp);
-  };
-
   const handleChange = (e) =>
     setForm({ ...form, [e.target.name]: e.target.value });
 
-  // ✅ Submit form พร้อม loading
+  // ✅ Toggle SignIn / SignUp
+  const handleToggle = () => {
+    setIsSignUp(!isSignUp);
+  };
+
+  // ✅ Submit
   const handleSubmit = async (e) => {
     e.preventDefault();
     setLoading(true);
@@ -62,16 +61,11 @@ const AuthForm = () => {
         const role = decoded.role;
         localStorage.setItem("role", role);
 
-        console.log("JWT token from login:", token);
-        console.log("Decoded role:", role);
-
         if (role === "ADMIN") {
           navigate("/admin-dashboard");
         } else {
           navigate("/user-dashboard");
         }
-
-        alert("Login success!");
       }
     } catch (err) {
       alert("Error: " + (err.response?.data || "Something went wrong"));
@@ -81,67 +75,117 @@ const AuthForm = () => {
   };
 
   return (
-    <>
-      <h2>Welcome to Pet management system</h2>
-      <div
-        className={`container ${isSignUp ? "right-panel-active" : ""}`}
-        id="container"
-      >
-        {/* Sign Up */}
-        <div className="form-container sign-up-container">
-          <form onSubmit={handleSubmit}>
-            <h3>Create Account</h3>
-            <input type="text" name="firstName" placeholder="First Name" onChange={handleChange} required />
-            <input type="text" name="lastName" placeholder="Last Name" onChange={handleChange} required />
-            <input type="text" name="nickName" placeholder="Nickname" onChange={handleChange} required />
-            <input type="number" name="age" placeholder="Age" onChange={handleChange} required />
-            <input type="email" name="email" placeholder="Email" onChange={handleChange} required />
-            <input type="password" name="password" placeholder="Password" onChange={handleChange} required />
-            <button type="submit" disabled={loading}>
-              {loading ? "Processing..." : "Sign Up"}
-            </button>
-          </form>
-        </div>
+    <section className="bg-gray-50 dark:bg-gray-900 min-h-screen flex items-center justify-center">
+      <div className="w-full max-w-md bg-white rounded-lg shadow dark:border dark:bg-gray-800 dark:border-gray-700">
+        <div className="p-6 space-y-6">
+          <h1 className="text-xl font-bold leading-tight tracking-tight text-gray-900 md:text-2xl dark:text-white text-center">
+            {isSignUp ? "Create an account" : "Sign in to your account"}
+          </h1>
 
-        {/* Sign In */}
-        <div className="form-container sign-in-container">
-          <form onSubmit={handleSubmit}>
-            <h1>Sign in</h1>
-            <span>or use your account</span>
-            <input type="email" name="email" placeholder="Email" onChange={handleChange} required />
-            <input type="password" name="password" placeholder="Password" onChange={handleChange} required />
-            <button type="submit" disabled={loading}>
-              {loading ? "Processing..." : "Sign In"}
-            </button>
-          </form>
-        </div>
+          <form className="space-y-4 md:space-y-6" onSubmit={handleSubmit}>
+            {isSignUp && (
+              <>
+                <input
+                  type="text"
+                  name="firstName"
+                  placeholder="First Name"
+                  className="w-full p-2.5 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:text-white"
+                  onChange={handleChange}
+                  required
+                />
+                <input
+                  type="text"
+                  name="lastName"
+                  placeholder="Last Name"
+                  className="w-full p-2.5 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:text-white"
+                  onChange={handleChange}
+                  required
+                />
+                <input
+                  type="text"
+                  name="nickName"
+                  placeholder="Nickname"
+                  className="w-full p-2.5 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:text-white"
+                  onChange={handleChange}
+                  required
+                />
+                <input
+                  type="number"
+                  name="age"
+                  placeholder="Age"
+                  className="w-full p-2.5 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:text-white"
+                  onChange={handleChange}
+                  required
+                />
+              </>
+            )}
 
-        {/* Overlay */}
-        <div className="overlay-container">
-          <div className="overlay">
-            <div className="overlay-panel overlay-left">
-              <h1>Welcome Back!</h1>
-              <p>To keep connected with us please login with your personal info</p>
-              <button className="ghost" onClick={handleToggle}>
-                Sign In
+            {/* Email */}
+            <input
+              type="email"
+              name="email"
+              placeholder="Email"
+              className="w-full p-2.5 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:text-white"
+              onChange={handleChange}
+              required
+            />
+
+            {/* Password */}
+            <input
+              type="password"
+              name="password"
+              placeholder="Password"
+              className="w-full p-2.5 border rounded-lg bg-gray-50 dark:bg-gray-700 dark:text-white"
+              onChange={handleChange}
+              required
+            />
+
+            {/* Remember + Toggle */}
+            {!isSignUp && (
+              <div className="flex items-center justify-between">
+                <label className="flex items-center text-sm text-gray-500 dark:text-gray-300">
+                  <input
+                    type="checkbox"
+                    className="mr-2 w-4 h-4"
+                  />
+                  Remember me
+                </label>
+                <a href="#" className="text-sm text-blue-600 hover:underline">
+                  Forgot password?
+                </a>
+              </div>
+            )}
+
+            {/* Submit */}
+            <button
+              type="submit"
+              className="w-full text-white bg-blue-600 hover:bg-blue-700 rounded-lg px-5 py-2.5"
+              disabled={loading}
+            >
+              {loading
+                ? "Processing..."
+                : isSignUp
+                ? "Sign Up"
+                : "Sign In"}
+            </button>
+
+            {/* Toggle */}
+            <p className="text-sm text-gray-500 dark:text-gray-400 text-center">
+              {isSignUp ? "Already have an account?" : "Don’t have an account yet?"}{" "}
+              <button
+                type="button"
+                onClick={handleToggle}
+                className="font-medium text-blue-600 hover:underline"
+              >
+                {isSignUp ? "Sign in" : "Sign up"}
               </button>
-            </div>
-            <div className="overlay-panel overlay-right">
-              <h1>Hello, Friend!</h1>
-              <p>Enter your personal details and start journey with us</p>
-              <button className="ghost" onClick={handleToggle}>
-                Sign Up
-              </button>
-            </div>
-          </div>
+            </p>
+          </form>
         </div>
       </div>
-
-      <footer>
-        <p>Created with ❤️ by Vivit</p>
-      </footer>
-    </>
+    </section>
   );
 };
 
 export default AuthForm;
+
