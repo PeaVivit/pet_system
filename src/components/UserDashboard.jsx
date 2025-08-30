@@ -98,7 +98,7 @@ const UserDashboard = () => {
           <table className="min-w-full border-collapse border border-gray-200 shadow-sm">
             <thead className="bg-gray-100">
               <tr>
-                <th className="border px-4 py-2">Image</th>
+                {/* <th className="border px-4 py-2">Image</th> */}
                 <th className="border px-4 py-2">Name</th>
                 <th className="border px-4 py-2">Species</th>
                 <th className="border px-4 py-2">Color</th>
@@ -110,7 +110,7 @@ const UserDashboard = () => {
             <tbody>
               {user.pets.map((pet) => (
                 <tr key={pet.id} className="hover:bg-gray-50">
-                  <td className="border px-4 py-2 text-center">
+                  {/* <td className="border px-4 py-2 text-center">
                     {pet.image_url ? (
                       <img
                         src={pet.image_url}
@@ -120,7 +120,7 @@ const UserDashboard = () => {
                     ) : (
                       <span className="text-gray-400">No Image</span>
                     )}
-                  </td>
+                  </td> */}
                   <td className="border px-4 py-2">{pet.name}</td>
                   <td className="border px-4 py-2">{pet.species}</td>
                   <td className="border px-4 py-2">{pet.color}</td>

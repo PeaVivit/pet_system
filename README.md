@@ -1,70 +1,114 @@
-# Getting Started with Create React App
+# 🐾 Pet System
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+A **Pet Management System** built with **Spring Boot (Backend)** and **React (Frontend)**.  
+It supports **JWT Authentication**, **Role-based Access Control (Admin/User)**, and full **Pet Management (with image upload)**.  
 
-## Available Scripts
+---
 
-In the project directory, you can run:
+## 📌 Features
 
-### `npm start`
+### 🔐 Authentication
+- Register / Login with Email + Password
+- JWT Token-based Authentication
+- Role-based Authorization (Admin, User)
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+### 👤 User Dashboard
+- Manage own profile (view & update)
+- Add pets (with image upload)
+- View list of pets owned by the user
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
+### 🛠️ Admin Dashboard
+- View all users
+- Edit / Delete user accounts
+- Manage user roles (Admin/User)
+- View pets associated with each user
 
-### `npm test`
+### 🐶 Pet Management
+- Add / Edit / Delete pets
+- Display pets per user
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+---
 
-### `npm run build`
+## 🏗️ Tech Stack
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+### Backend (Spring Boot 3.5.3)
+- Spring Boot (REST API)
+- Spring Security + JWT
+- JPA + Hibernate
+- PostgreSQL
+- Lombok
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+### Frontend (React + Vite)
+- React.js
+- Axios
+- Tailwind CSS
+- JWT Authentication (localStorage)
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+---
 
-### `npm run eject`
+## ⚙️ Installation
 
-**Note: this is a one-way operation. Once you `eject`, you can't go back!**
+### 1. Clone Repository
+```bash
+git clone https://github.com/your-username/pet_system.git
+cd pet_system
 
-If you aren't satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you're on your own.
+ Backend Setup
+cd backend
+./mvnw spring-boot:run
 
-You don't have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn't feel obligated to use this feature. However we understand that this tool wouldn't be useful if you couldn't customize it when you are ready for it.
 
-## Learn More
+Configure your PostgreSQL database in application.properties
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+Default API runs at: http://localhost:8080/api
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+3. Frontend Setup
+cd frontend
+npm install
+npm run dev
 
-### Code Splitting
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/code-splitting](https://facebook.github.io/create-react-app/docs/code-splitting)
+Runs on: http://localhost:5173
 
-### Analyzing the Bundle Size
+📂 Project Structure
+pet_system/
+│── backend/         # Spring Boot API
+│   ├── config/      # Security & JWT config
+│   ├── controllers/ # REST controllers
+│   ├── dto/         # Data Transfer Objects
+│   ├── models/      # Entities (AppUser, Pets)
+│   ├── repositories/# Spring Data JPA
+│   └── services/    # Business logic
+│
+│── frontend/        # React + Vite app
+│   ├── src/
+│   │   ├── components/ # Reusable UI components
+│   │   ├── pages/      # User & Admin dashboards
+│   │   ├── api.js      # Axios instance
+│   │   └── App.js      # Root component
+│
+└── README.md
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size](https://facebook.github.io/create-react-app/docs/analyzing-the-bundle-size)
+🚀 Usage
 
-### Making a Progressive Web App
+- Register as a new user and log in
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app](https://facebook.github.io/create-react-app/docs/making-a-progressive-web-app)
+- Add pets (with optional images)
 
-### Advanced Configuration
+- Manage pets via User Dashboard
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/advanced-configuration](https://facebook.github.io/create-react-app/docs/advanced-configuration)
+- Admin can manage users & roles via Admin Dashboard
 
-### Deployment
+🔒 Authentication Flow
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/deployment](https://facebook.github.io/create-react-app/docs/deployment)
+- User registers or logs in
 
-### `npm run build` fails to minify
+- Backend issues a JWT token
 
-This section has moved here: [https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify](https://facebook.github.io/create-react-app/docs/troubleshooting#npm-run-build-fails-to-minify)
+- Token is stored in localStorage
+
+- Axios attaches token in Authorization: Bearer <token>
+
+- Backend verifies token for every protected route
+
